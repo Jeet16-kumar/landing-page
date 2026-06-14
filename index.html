@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDIO KRAFT / SPOTLIGHT &mdash; Independent Artifacts Market</title>
+    
+    <!-- Google Fonts: Syne for structural editorial headings, Inter for high-density baseline data maps -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- BRAND SPOTLIGHT DESIGN SYSTEM --- */
+        :root {
+            --bg-abyss: #070708;         /* Deep obsidian base */
+            --bg-panel: #111215;         /* Elevated surface container charcoal */
+            --text-stark: #ffffff;       /* Luminous heading white */
+            --text-dull: #727682;        /* Editorial structural gray text */
+            --spotlight-red: #ff1e27;    /* Saturated Campaign Highlight Color */
+            --border-line: #1d1f26;      /* Thin structural framing line */
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --transition-smooth: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--bg-abyss);
+            color: var(--text-stark);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- STICKY EDITORIAL TOP UTILITY FRAME --- */
+        .spotlight-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 4vw;
+            border-bottom: 1px solid var(--border-line);
+            position: sticky;
+            top: 0;
+            background-color: rgba(7, 7, 8, 0.95);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+        }
+
+        .nav-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-family: var(--font-display);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            letter-spacing: -1px;
+            color: var(--text-stark);
+            text-decoration: none;
+        }
+
+        .campaign-badge {
+            font-size: 0.65rem;
+            background-color: var(--spotlight-red);
+            color: white;
+            padding: 2px 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .nav-menu-channels {
+            display: flex;
+            gap: 20px;
+        }
+
+        .channel-btn {
+            background: none;
+            border: none;
+            color: var(--text-dull);
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            padding: 5px 0;
+            transition: color 0.3s ease, transform 0.3s;
+        }
+
+        .channel-btn:hover, .channel-btn.active-channel {
+            color: var(--text-stark);
+        }
+
+        .channel-btn.active-channel {
+            border-bottom: 2px solid var(--spotlight-red);
+            font-weight: 600;
+        }
+
+        /* --- DYNAMIC VIEW PAGE WRAPPER PIPELINES --- */
+        .page-view-container {
+            display: none; 
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.5s ease, transform 0.5s var(--ease-cinematic);
+        }
+
+        .page-view-container.active-view {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- SIGNATURE DUAL-SPLIT ROW SCREEN LAYOUT --- */
+        .i-d-split-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: calc(100vh - 65px);
+            border-bottom: 1px solid var(--border-line);
+        }
+
+        @media (min-width: 992px) {
+            .i-d-split-layout {
+                grid-template-columns: 1.1fr 1fr; 
+            }
+        }
+
+        /* LEFT SIDE STICKY DISPLAY PROFILE MURAL */
+        .split-sticky-mural {
+            padding: 60px 4vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #0b0b0c;
+            border-bottom: 1px solid var(--border-line);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 992px) {
+            .split-sticky-mural {
+                position: sticky;
+                top: 65px;
+                height: calc(100vh - 65px);
+                border-bottom: none;
+                border-right: 1px solid var(--border-line);
+                padding: 80px 4vw;
+            }
+        }
+
+        /* Fixed background image constraints */
+        .mural-artwork-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.12;
+            mix-blend-mode: luminosity;
+            filter: grayscale(100%) contrast(130%);
+            z-index: 1;
+            transition: opacity 0.6s ease;
+        }
+
+        .split-sticky-mural:hover .mural-artwork-backdrop {
+            opacity: 0.22;
+        }
+
+        .mural-content-foreground {
+            position: relative;
+            z-index: 5; /* Forces elements forward */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Regulated font scales preventing word collision */
+        h1.mural-massive-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.4rem, 7.5vw, 5.8rem);
+            font-weight: 800;
+            line-height: 0.85;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            word-break: break-word;
+        }
+
+        h1.mural-massive-title span {
+            color: var(--spotlight-red);
+            display: inline-block;
+        }
+
+        .mural-footer-meta {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-line);
+            padding-top: 30px;
+        }
+
+        .mural-abstract-pitch {
+            font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+            line-height: 1.45;
+            font-weight: 300;
+            color: var(--text-stark);
+            margin-bottom: 25px;
+        }
+
+        .mural-abstract-pitch span {
+            color: var(--text-dull);
+        }
+
+        .mural-stamp-tags {
+            display: flex;
+            gap: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dull);
+        }
+
+        /* RIGHT SIDE SCROLLABLE FEED STREAM */
+        .split-scrollable-feed {
+            padding: 60px 4vw;
+        }
+
+        @media (min-width: 992px) {
+            .split-scrollable-feed {
+                padding: 80px 4vw;
+            }
+        }
+
+        .feed-heading-block {
+            margin-bottom: 60px;
+        }
+
+        .feed-section-index {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--spotlight-red);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .feed-section-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- THE GRID CATALOG (PRODUCTS MATRIX) --- */
+        .spotlight-products-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 640px) {
+            .spotlight-products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+        }
+
+        .artifact-spotlight-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-line);
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: border-color 0.3s;
+        }
+
+        .artifact-spotlight-card:hover {
+            border-color: var(--text-stark);
+        }
+
+        .artifact-media-lens {
+            width: 100%;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            border: 1px solid var(--border-line);
+            background-color: var(--bg-abyss);
+        }
+
+        .artifact-media-lens img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(115%);
+            transition: transform var(--transition-smooth), filter 0.4s ease;
+        }
+
+        .artifact-spotlight-card:hover .artifact-media-lens img {
+            transform: scale(1.04);
+            filter: grayscale(0%) contrast(100%);
+        }
+
+        .artifact-text-group {
+            margin-top: 20px;
+        }
+
+        .artifact-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+
+        .artifact-title-label {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .artifact-price-label {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--spotlight-red);
+        }
+
+        .artifact-caption-desc {
+            font-size: 0.85rem;
+            color: var(--text-dull);
+            line-height: 1.5;
+            font-weight: 300;
+        }
+
+        /* --- THE COHESIVE STORY BLOCKS (HOME SPECIFIC FEATURES) --- */
+        .story-strip-node {
+            border-top: 1px solid var(--border-line);
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .story-index {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--border-line);
+        }
+
+        .story-strip-node:hover .story-index {
+            color: var(--spotlight-red);
+            -webkit-text-stroke: 1px var(--spotlight-red);
+        }
+
+        .story-heading-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .story-body-text {
+            font-size: 0.95rem;
+            color: var(--text-dull);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* --- IMMERSIVE INTERACTIVE DETAIL LIGHTBOX MODAL --- */
+        .spotlight-lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(7, 7, 8, 0.98);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 24px;
+        }
+
+        .spotlight-lightbox-modal.lightbox-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox-panel-box {
+            display: grid;
+            grid-template-columns: 1fr;
+            background-color: #0e0e10;
+            border: 1px solid var(--border-line);
+            width: 100%;
+            max-width: 950px;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .lightbox-panel-box {
+                grid-template-columns: 1fr 1.2fr;
+            }
+        }
+
+        .lightbox-close-trigger {
+            position: absolute;
+            top: -45px;
+            right: 0;
+            background: none;
+            border: none;
+            color: var(--text-stark);
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        .lightbox-image-lens {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-bottom: 1px solid var(--border-line);
+        }
+
+        @media (min-width: 768px) {
+            .lightbox-image-lens {
+                height: 100%;
+                border-bottom: none;
+                border-right: 1px solid var(--border-line);
+            }
+        }
+
+        .lightbox-image-lens img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lightbox-data-shell {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .lightbox-title-heading {
+            font-family: var(--font-display);
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 15px;
+        }
+
+        .lightbox-paragraph-copy {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-dull);
+            font-weight: 300;
+            margin-bottom: 35px;
+        }
+
+        .lightbox-acquire-btn {
+            background-color: var(--spotlight-red);
+            color: white;
+            border: none;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            letter-spacing: 1.5px;
+            transition: opacity 0.3s;
+        }
+
+        .lightbox-acquire-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* --- EXTRA LONG DISPATCH MAGAZINE FOOTER --- */
+        .spotlight-magazine-footer {
+            padding: 80px 4vw 40px 4vw;
+            background-color: #040405;
+            border-top: 1px solid var(--border-line);
+            margin-top: auto;
+        }
+
+        .footer-action-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        @media (min-width: 768px) {
+            .footer-action-row {
+                grid-template-columns: 1.2fr 1fr;
+                align-items: flex-end;
+            }
+        }
+
+        .footer-cta-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            line-height: 1.1;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .footer-input-boundary {
+            display: flex;
+            border-bottom: 2px solid var(--text-stark);
+            padding-bottom: 10px;
+        }
+
+        .footer-input-node {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-stark);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .footer-input-node::placeholder {
+            color: var(--text-dull);
+        }
+
+        .footer-arrow-submit {
+            background: none;
+            border: none;
+            color: var(--text-stark);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .footer-utility-meta-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-top: 1px solid var(--border-line);
+            padding-top: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .footer-utility-meta-bar {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .footer-link-grouping {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-link-grouping a {
+            color: var(--text-stark);
+            text-decoration: none;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .footer-link-grouping a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--text-stark);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s var(--ease-cinematic);
+        }
+
+        .footer-link-grouping a:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .footer-legal-stamp {
+            font-size: 0.75rem;
+            color: var(--text-dull);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STICKY TOP SPOTLIGHT CAMPAIGN NAVIGATION -->
+    <nav class="spotlight-nav-header">
+        <div class="nav-logo-group">
+            <a href="#" class="brand-logo" onclick="routeToChannelView(event, 'home-view')">STUDIO KRAFT</a>
+            <span class="campaign-badge">RED</span>
+        </div>
+        <div class="nav-menu-channels">
+            <button class="channel-btn active-channel" onclick="routeToChannelView(event, 'home-view')">Campaign</button>
+            <button class="channel-btn" onclick="routeToChannelView(event, 'ceramics-page')">Ceramics</button>
+            <button class="channel-btn" onclick="routeToChannelView(event, 'textiles-page')">Textiles</button>
+            <button class="channel-btn" onclick="routeToChannelView(event, 'apothecary-page')">Apothecary</button>
+        </div>
+    </nav>
+
+    <!-- ================= PAGE VIEW 1: HOME CAMPAIGN ================= -->
+    <div class="page-view-container active-view" id="home-view">
+        <div class="i-d-split-layout">
+            
+            <div class="split-sticky-mural">
+                <div class="mural-artwork-backdrop" style="background-image: url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="mural-content-foreground">
+                    <h1 class="mural-massive-title">The<br>Raw<br><span>ART</span></h1>
+                    <div class="mural-footer-meta">
+                        <p class="mural-abstract-pitch">
+                            Dismantling mass standardization. <span>We track raw, irregular creations crafted carefully by independent global studios to foreground true textural honesty.</span>
+                        </p>
+                        <div class="mural-stamp-tags">
+                            <span>Issue 04</span>
+                            <span>&bull;</span>
+                            <span>Curation Open</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-scrollable-feed">
+                <div class="feed-heading-block">
+                    <div class="feed-section-index">01 / Manifesto</div>
+                    <h2 class="feed-section-title">Core Disciplines</h2>
+                </div>
+
+                <div class="story-stream-wrapper">
+                    <!-- Story Block 1 -->
+                    <div class="story-strip-node">
+                        <div class="story-index">01</div>
+                        <h3 class="story-heading-title">Slow Execution</h3>
+                        <p class="story-body-text">Objects emerge via long manual attention constraints. Production volume drops significantly to protect the specific structural integrity of individual compositions.</p>
+                    </div>
+
+                    <!-- Story Block 2 -->
+                    <div class="story-strip-node">
+                        <div class="story-index">02</div>
+                        <h3 class="story-heading-title">Unrefined Compounds</h3>
+                        <p class="story-body-text">Sourced direct from wild earth fissures. We reject artificial smoothing glazes to highlight iron flecks and cooling cracks from high-temperature kilns.</p>
+                    </div>
+
+                    <!-- Story Block 3 -->
+                    <div class="story-strip-node">
+                        <div class="story-index">03</div>
+                        <h3 class="story-heading-title">Direct Compensation</h3>
+                        <p class="story-body-text">By circumventing commercial distributor links, our model ensures sustainable economic compensation channels route immediately back to creative workshops.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= PAGE VIEW 2: CERAMICS PAGE INDEX ================= -->
+    <div class="page-view-container" id="ceramics-page">
+        <div class="i-d-split-layout">
+            
+            <div class="split-sticky-mural">
+                <div class="mural-artwork-backdrop" style="background-image: url('https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="mural-content-foreground">
+                    <h1 class="mural-massive-title">Clay<br>&amp;<br><span>Earth</span></h1>
+                    <div class="mural-footer-meta">
+                        <p class="mural-abstract-pitch">
+                            Fired structural minerals. <span>A cataloging of vessels shaped by hand pressure on flywheel units, hardened across reduction reduction-kiln cycles.</span>
+                        </p>
+                        <div class="mural-stamp-tags">
+                            <span>Channel 01</span>
+                            <span>&bull;</span>
+                            <span>2 Artifacts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-scrollable-feed">
+                <div class="feed-heading-block">
+                    <div class="feed-section-index">02 / Ceramics Collection</div>
+                    <h2 class="feed-section-title">Available Ware</h2>
+                </div>
+
+                <div class="spotlight-products-grid">
+                    <div class="artifact-spotlight-card" onclick="openLightboxSystem('Obsidian Basal Vessel', 'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=800&auto=format&fit=crop', 'Coarse reduction dark compounds thrown manually without machine guide assistance. Surface captures random carbon trapping metrics.')">
+                        <div class="artifact-media-lens"><img src="https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=800&auto=format&fit=crop" alt="Obsidian Vessel"></div>
+                        <div class="artifact-text-group">
+                            <div class="artifact-header-row">
+                                <h4 class="artifact-title-label">Obsidian Basin</h4>
+                                <span class="artifact-price-label">&curren; 140</span>
+                            </div>
+                            <p class="artifact-caption-desc">Unrefined dark reduction-clay compound.</p>
+                        </div>
+                    </div>
+
+                    <div class="artifact-spotlight-card" onclick="openLightboxSystem('Iron Speckled Chalice Set', 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?q=80&w=800&auto=format&fit=crop', 'Iron specks breakthrough a matte white slip application. Formulated for everyday tea alignment rituals.')">
+                        <div class="artifact-media-lens"><img src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?q=80&w=800&auto=format&fit=crop" alt="Stoneware Chalice"></div>
+                        <div class="artifact-text-group">
+                            <div class="artifact-header-row">
+                                <h4 class="artifact-title-label">Stoneware Chalice</h4>
+                                <span class="artifact-price-label">&curren; 65</span>
+                            </div>
+                            <p class="artifact-caption-desc">Flywheel run raw ash glazed set.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= PAGE VIEW 3: TEXTILES PAGE INDEX ================= -->
+    <div class="page-view-container" id="textiles-page">
+        <div class="i-d-split-layout">
+            
+            <div class="split-sticky-mural">
+                <div class="mural-artwork-backdrop" style="background-image: url('https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="mural-content-foreground">
+                    <h1 class="mural-massive-title">Weave<br>&amp;<br><span>Flax</span></h1>
+                    <div class="mural-footer-meta">
+                        <p class="mural-abstract-pitch">
+                            Interlaced organic plant fibers. <span>Loom architectures operating on manual timing steps to craft high-density heavy textiles.</span>
+                        </p>
+                        <div class="mural-stamp-tags">
+                            <span>Channel 02</span>
+                            <span>&bull;</span>
+                            <span>2 Artifacts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-scrollable-feed">
+                <div class="feed-heading-block">
+                    <div class="feed-section-index">02 / Textile Collection</div>
+                    <h2 class="feed-section-title">Loom Works</h2>
+                </div>
+
+                <div class="spotlight-products-grid">
+                    <div class="artifact-spotlight-card" onclick="openLightboxSystem('Loomed Flax Wrap Blanket', 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=800&auto=format&fit=crop', 'Heavy density raw flax yarn processed on timber floor looms. Left unbleached to retain natural field shadows.')">
+                        <div class="artifact-media-lens"><img src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=800&auto=format&fit=crop" alt="Flax Loom Blanket"></div>
+                        <div class="artifact-text-group">
+                            <div class="artifact-header-row">
+                                <h4 class="artifact-title-label">Flax Loom Wrap</h4>
+                                <span class="artifact-price-label">&curren; 210</span>
+                            </div>
+                            <p class="artifact-caption-desc">Unbleached coarse structured plant fibers.</p>
+                        </div>
+                    </div>
+
+                    <div class="artifact-spotlight-card" onclick="openLightboxSystem('Fermented Indigo Panel Dye', 'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?q=80&w=800&auto=format&fit=crop', 'Mountain wool textile submerged repeatedly inside biological fermented indigo plant leaf extract vats.')">
+                        <div class="artifact-media-lens"><img src="https://images.unsplash.com/photo-1601924994987-69e26d50dc26?q=80&w=800&auto=format&fit=crop" alt="Indigo dyed panel wool"></div>
+                        <div class="artifact-text-group">
+                            <div class="artifact-header-row">
+                                <h4 class="artifact-title-label">Indigo Panel</h4>
+                                <span class="artifact-price-label">&curren; 320</span>
+                            </div>
+                            <p class="artifact-caption-desc">Bio-vat colored thick hand drapes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= PAGE VIEW 4: APOTHECARY PAGE INDEX ================= -->
+    <div class="page-view-container" id="apothecary-page">
+        <div class="i-d-split-layout">
+            
+            <div class="split-sticky-mural">
+                <div class="mural-artwork-backdrop" style="background-image: url('https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="mural-content-foreground">
+                    <h1 class="mural-massive-title">Pure<br>Extract<br><span>Labs</span></h1>
+                    <div class="mural-footer-meta">
+                        <p class="mural-abstract-pitch">
+                            Steam-distilled plant resin logic. <span>Concentrated elixirs produced inside copper alembic equipment to process raw forest scents.</span>
+                        </p>
+                        <div class="mural-stamp-tags">
+                            <span>Channel 03</span>
+                            <span>&bull;</span>
+                            <span>1 Artifact</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="split-scrollable-feed">
+                <div class="feed-heading-block">
+                    <div class="feed-section-index">02 / Apothecary Manifest</div>
+                    <h2 class="feed-section-title">Elixirs</h2>
+                </div>
+
+                <div class="spotlight-products-grid">
+                    <div class="artifact-spotlight-card" onclick="openLightboxSystem('Hinoki Concentrated Elixir', 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=800&auto=format&fit=crop', 'Pure essential oils compressed from authentic cedar wood cuts. Delivers deep grounding properties via single drop diffusion.')">
+                        <div class="artifact-media-lens"><img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=800&auto=format&fit=crop" alt="Hinoki Elixir"></div>
+                        <div class="artifact-text-group">
+                            <div class="artifact-header-row">
+                                <h4 class="artifact-title-label">Hinoki Extract</h4>
+                                <span class="artifact-price-label">&curren; 85</span>
+                            </div>
+                            <p class="artifact-caption-desc">Cold-pressed steam-distilled cedar wood oil.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- INTERACTIVE LIGHTBOX MODAL CONTAINER LAYER -->
+    <div class="spotlight-lightbox-modal" id="lightboxModal">
+        <div class="lightbox-panel-box">
+            <button class="lightbox-close-trigger" onclick="closeLightboxSystem()">Dismiss View &times;</button>
+            <div class="lightbox-image-lens">
+                <img src="" id="modalImgNode" alt="Selected Exhibit Frame">
+            </div>
+            <div class="lightbox-data-shell">
+                <h3 class="lightbox-title-heading" id="modalTitleNode">Exhibit Artifact</h3>
+                <p class="lightbox-paragraph-copy" id="modalDescNode">Processing structural dataset maps...</p>
+                <button class="lightbox-acquire-btn" onclick="alert('Artifact verification request logged.')">Reserve Material</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DISPATCH REGISTRY MAGAZINE FOOTER -->
+    <footer class="spotlight-footer-canvas">
+        <div class="footer-action-row">
+            <div>
+                <h2 class="footer-cta-title">Subscribe to dispatch circular data maps on upcoming craft arrivals.</h2>
+            </div>
+            <div>
+                <form class="footer-input-boundary" onsubmit="event.preventDefault(); alert('Transmission Authenticated.');">
+                    <input type="email" class="footer-input-node" placeholder="Enter transmission email..." required>
+                    <button type="submit" class="footer-arrow-submit">&rarr;</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-utility-meta-bar">
+            <div class="footer-link-grouping">
+                <a href="#">Instagram Channel</a>
+                <a href="#">Studio Journal</a>
+                <a href="#">Craft Manifesto</a>
+            </div>
+            <div class="footer-legal-stamp">
+                &copy; 2026 STUDIO KRAFT INC. ALL CHANNELS OPERATIONAL.
+            </div>
+        </div>
+    </footer>
+
+    <!-- NAVIGATION ROUTING ENGINE SCRIPT -->
+    <script>
+        function routeToChannelView(event, destinationViewId) {
+            if(event.currentTarget.tagName === 'A') {
+                event.preventDefault();
+            }
+
+            const activeNavs = document.querySelectorAll('.channel-btn');
+            activeNavs.forEach(btn => btn.classList.remove('active-channel'));
+            
+            if(event.currentTarget.classList.contains('channel-btn')) {
+                event.currentTarget.classList.add('active-channel');
+            } else {
+                document.querySelector('.channel-btn').classList.add('active-channel');
+            }
+
+            const primaryViews = document.querySelectorAll('.page-view-container');
+            primaryViews.forEach(view => {
+                view.classList.remove('active-view');
+                view.style.opacity = '0';
+            });
+
+            const targetedPage = document.getElementById(destinationViewId);
+            targetedPage.classList.add('active-view');
+            
+            setTimeout(() => {
+                targetedPage.style.opacity = '1';
+            }, 50);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const modalContainerElement = document.getElementById('lightboxModal');
+        const imgTarget = document.getElementById('modalImgNode');
+        const titleTarget = document.getElementById('modalTitleNode');
+        const descTarget = document.getElementById('modalDescNode');
+
+        function openLightboxSystem(title, imgSrc, paragraphCopy) {
+            imgTarget.src = imgSrc;
+            titleTarget.innerText = title;
+            descTarget.innerText = paragraphCopy;
+            
+            modalContainerElement.classList.add('lightbox-visible');
+        }
+
+        function closeLightboxSystem() {
+            modalContainerElement.classList.remove('lightbox-visible');
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modalContainerElement) {
+                closeLightboxSystem();
+            }
+        }
+    </script>
+
+</body>
+</html>
